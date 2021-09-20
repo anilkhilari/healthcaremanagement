@@ -8,8 +8,9 @@ public interface SpecializationService {
 	
 	public Specialization saveSpecialization(Specialization specialization);
 	public List<Specialization> getAllSpecialization();
-	public void deleteSpecialization(Integer id);
-	public Specialization getSpecialization(Integer id);
+	public void deleteSpecialization(Long id);
+	public Specialization getSpecialization(Long id);
 	public Specialization updateSpecialization(Specialization specialization);
+	public boolean isSpecCodeExist(String code); 
 
 }

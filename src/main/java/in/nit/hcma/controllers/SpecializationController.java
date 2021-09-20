@@ -9,11 +9,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import in.nit.hcma.entities.Specialization;
+import in.nit.hcma.exception.SpecializationNotFoundException;
 import in.nit.hcma.services.SpecializationService;
+import in.nit.hcma.views.SpecializationExport;
 
 @Controller
 @RequestMapping("/specialization")
@@ -30,56 +33,102 @@ public class SpecializationController {
 	
 	@PostMapping("/save")
 	public String saveSpecialization(@ModelAttribute Specialization specialization,
-						Model model)
+									Model model,
+									RedirectAttributes attributes)
 	
 	{
 		specialization=specializationService.saveSpecialization(specialization);
-		String data="Data Saved successfully :"+specialization.getId();
-		model.addAttribute("data",data);
-		List<Specialization> specializations=specializationService.getAllSpecialization();
-		model.addAttribute("specializations", specializations);
-		return "SpecializationData";
+		String message="Data Saved successfully :"+specialization.getId();
+		attributes.addAttribute("message",message);
+		return "redirect:all";
 	}
 	
 	@GetMapping("/all")
-	public String getAllSpecialization(Model model)
-	{
+	public String getAllSpecialization(
+									   Model model,
+									   @RequestParam (value="message",required = false) String message) {
+			
 		List<Specialization> specializations=specializationService.getAllSpecialization();
 		model.addAttribute("specializations", specializations);
+		model.addAttribute("message", message);
 		return "SpecializationData";
+		
 	}
 	
 	@GetMapping("/delete")
-	public String deleteSpecialization(@RequestParam Integer id,Model model)
+	public String deleteSpecialization(@RequestParam Long id,
+									   RedirectAttributes attributes)
 	{
-		specializationService.deleteSpecialization(id);
-		String message=" Specialization '"+id+"' deleted successfully";
-		model.addAttribute("message", message);
-		List<Specialization> specializations=specializationService.getAllSpecialization();
-		model.addAttribute("specializations", specializations);
-		return "SpecializationData";
+		try {
+			specializationService.deleteSpecialization(id);
+			String message=" Specialization '"+id+"' deleted successfully";
+			attributes.addAttribute("message", message);
+			
+		}
+		catch (SpecializationNotFoundException e) {
+			e.printStackTrace();
+			attributes.addAttribute("message", e.getMessage());
+			
+			
+		}
+		return "redirect:all";
 	}
 	
 	@GetMapping("/edit")
-	public String editSpecialization(@RequestParam Integer id,
-									Model model)
+	public String editSpecialization(@RequestParam Long id,
+			Model model,
+			RedirectAttributes attributes
+			) 
 	{
-		Specialization specialization=specializationService.getSpecialization(id);
-		model.addAttribute("specialization", specialization);
-		return "EditSpecialization";
+		String page = null;
+		try {
+			Specialization spec = specializationService.getSpecialization(id);
+			model.addAttribute("specialization", spec);
+			page = "EditSpecialization";
+		} catch (SpecializationNotFoundException e) {
+			e.printStackTrace();
+			attributes.addAttribute("message", e.getMessage());
+			page = "redirect:all";
+		}
+		return page;
 	}
+	
 	
 	@PostMapping("/update")
 	public String updateSpecialization(@ModelAttribute Specialization specialization,
-						Model model)
+										Model model,
+										RedirectAttributes attributes)
 	
 	{
 		specialization=specializationService.saveSpecialization(specialization);
-		String data="Data Saved successfully :"+specialization.getId();
-		model.addAttribute("data",data);
+		String message=" Specialization '"+specialization.getId()+"' updated successfully";
+		attributes.addAttribute("message", message);
+		return "redirect:all";
+	}
+	
+	@GetMapping("/checkCode")
+	@ResponseBody
+	public String validateSpecCode(
+			@RequestParam String code
+			) 
+	{
+		String message = "";
+		if(specializationService.isSpecCodeExist(code)) {
+			message = code + ", already exist";
+		} 
+		
+		return message; //this is not viewName(it is message)
+	}
+	
+	@GetMapping("/excel")
+	public ModelAndView excelExport() {
+		ModelAndView m=new ModelAndView();
+		m.setView(new SpecializationExport());
 		List<Specialization> specializations=specializationService.getAllSpecialization();
-		model.addAttribute("specializations", specializations);
-		return "SpecializationData";
+		m.addObject("specializations", specializations);
+		
+		return m;
+		
 	}
 
 }

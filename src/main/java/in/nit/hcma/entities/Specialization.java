@@ -18,7 +18,7 @@ public class Specialization implements Serializable{
 	private static final long serialVersionUID = -5050248613556459886L;
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Integer id;
+	private Long id;
 	private String code;
 	private String name;
 	private String note;
@@ -28,7 +28,7 @@ public class Specialization implements Serializable{
 		// TODO Auto-generated constructor stub
 	}
 
-	public Specialization(Integer id, String code, String name, String note) {
+	public Specialization(Long id, String code, String name, String note) {
 		super();
 		this.id = id;
 		this.code = code;
@@ -36,11 +36,11 @@ public class Specialization implements Serializable{
 		this.note = note;
 	}
 
-	public Integer getId() {
+	public Long getId() {
 		return id;
 	}
 
-	public void setId(Integer id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
 

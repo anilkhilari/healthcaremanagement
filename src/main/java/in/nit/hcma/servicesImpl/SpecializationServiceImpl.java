@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import in.nit.hcma.entities.Specialization;
+import in.nit.hcma.exception.SpecializationNotFoundException;
 import in.nit.hcma.repositories.SpecializationRepository;
 import in.nit.hcma.services.SpecializationService;
 
@@ -15,6 +16,7 @@ public class SpecializationServiceImpl implements SpecializationService {
 	
 	@Autowired
 	private SpecializationRepository specializationRepository;
+	private Object String;
 	@Override
 	public Specialization saveSpecialization(Specialization specialization) {
 		
@@ -29,21 +31,23 @@ public class SpecializationServiceImpl implements SpecializationService {
 	}
 	
 	@Override
-	public void deleteSpecialization(Integer id) {
+	public void deleteSpecialization(Long id) {
+		specializationRepository.delete(getSpecialization(id));
 		
-		specializationRepository.deleteById(id);
 	}
 	
 	  @Override
-	public Specialization getSpecialization(Integer id) {
+	public Specialization getSpecialization(Long id) {
 		Optional<Specialization> optional= specializationRepository.findById(id);
 		
 		if(optional.isPresent())
 		{
 			return optional.get();
-		}else 
-		
-		return null;
+		}else {
+			
+			String message= id +" not found ";
+			throw new SpecializationNotFoundException(message);
+		}
 		
 	  }
 	  
@@ -51,5 +55,13 @@ public class SpecializationServiceImpl implements SpecializationService {
 	public Specialization updateSpecialization(Specialization specialization) {
 		specialization=specializationRepository.save(specialization);
 		return specialization;
+	}
+	
+	@Override
+	public boolean isSpecCodeExist(String code) {
+		/*Integer count = repo.getSpecCodeCount(specCode);
+		boolean exist = count>0 ? true : false;
+		return exist;*/
+		return specializationRepository.getSpecCodeCount(code)>0;
 	}
 }
